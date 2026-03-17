@@ -1,0 +1,7 @@
+services:
+  courier-tracking:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - JAVA_OPTS=-Xms256m -Xmx512m

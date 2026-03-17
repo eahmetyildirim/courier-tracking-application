@@ -1,0 +1,8 @@
+courier:
+  distance:
+    strategy: HAVERSINE
+  store:
+    proximity-meters: 100
+    reentry-threshold-seconds: 60
+  idempotency:
+    ttl-seconds: 600

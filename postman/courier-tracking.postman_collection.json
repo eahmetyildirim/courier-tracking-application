@@ -1,0 +1,1080 @@
+{
+  "info": {
+    "name": "Courier Tracking - Case Scenarios",
+    "description": "Migros case requirement scenarios for Postman Collection Runner. Each folder resets runtime state first, gets a fresh token, then verifies one requirement.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "courierId",
+      "value": "1"
+    },
+    {
+      "key": "token",
+      "value": "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJjb3VyaWVySWQiOjF9.signature"
+    },
+    {
+      "key": "authorizationHeader",
+      "value": "Bearer eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJjb3VyaWVySWQiOjF9.signature"
+    },
+    {
+      "key": "locationTime1",
+      "value": "2026-03-17T10:00:00Z"
+    },
+    {
+      "key": "locationTime2",
+      "value": "2026-03-17T10:00:10Z"
+    },
+    {
+      "key": "locationTime3",
+      "value": "2026-03-17T10:00:20Z"
+    },
+    {
+      "key": "totalDistance",
+      "value": "0"
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "const defaults = {",
+          "  baseUrl: 'http://localhost:8080',",
+          "  courierId: '1',",
+          "  token: 'eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJjb3VyaWVySWQiOjF9.signature',",
+          "  authorizationHeader: 'Bearer eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJjb3VyaWVySWQiOjF9.signature',",
+          "  locationTime1: '2026-03-17T10:00:00Z',",
+          "  locationTime2: '2026-03-17T10:00:10Z',",
+          "  locationTime3: '2026-03-17T10:00:20Z',",
+          "  totalDistance: '0'",
+          "};",
+          "Object.entries(defaults).forEach(([key, value]) => {",
+          "  if (!pm.collectionVariables.get(key)) {",
+          "    pm.collectionVariables.set(key, value);",
+          "  }",
+          "});"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "Scenario 1 - Store Entry Is Recorded",
+      "description": "Kurye Ataşehir MMM Migros 100m yaricapina girince store entry kaydi olusur.",
+      "item": [
+        {
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/testing/reset-state",
+              "path": [
+                "api",
+                "testing",
+                "reset-state"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('reset message exists', function () { pm.expect(pm.response.json().message).to.eql('In-memory runtime state cleared.'); });"
+                ]
+              }
+            }
+          ],
+          "name": "1. State Reset"
+        },
+        {
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/testing/example-token?courierId=1",
+              "path": [
+                "api",
+                "testing",
+                "example-token"
+              ],
+              "query": [
+                {
+                  "key": "courierId",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', function () { pm.response.to.have.status(200); });",
+                  "const body = pm.response.json();",
+                  "pm.collectionVariables.set('courierId', '1');",
+                  "pm.collectionVariables.set('token', body.token);",
+                  "pm.collectionVariables.set('authorizationHeader', body.authorizationHeader);",
+                  "pm.collectionVariables.set('locationTime1', '2026-03-17T10:00:00Z');"
+                ]
+              }
+            }
+          ],
+          "name": "2. Token Al"
+        },
+        {
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{authorizationHeader}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/courier-locations",
+              "path": [
+                "api",
+                "courier-locations"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"time\": \"{{locationTime1}}\",\n  \"lat\": 40.9923307,\n  \"lng\": 29.1244229\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 201', function () { pm.response.to.have.status(201); });"
+                ]
+              }
+            }
+          ],
+          "name": "3. Atasehir Yakinina Lokasyon Gonder"
+        },
+        {
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/testing/store-entry-history?courierId=1",
+              "path": [
+                "api",
+                "testing",
+                "store-entry-history"
+              ],
+              "query": [
+                {
+                  "key": "courierId",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', function () { pm.response.to.have.status(200); });",
+                  "const body = pm.response.json();",
+                  "pm.test('one entry exists', function () { pm.expect(body.entryCount).to.eql(1); });",
+                  "pm.test('store is Atasehir MMM Migros', function () { pm.expect(body.entries[0].storeName).to.eql('Ataşehir MMM Migros'); });"
+                ]
+              }
+            }
+          ],
+          "name": "4. Store Entry History Dogrula"
+        }
+      ]
+    },
+    {
+      "name": "Scenario 2 - Reentry Within 1 Minute Is Ignored",
+      "description": "Ayni kurye ayni magazaya 60 saniye icinde tekrar yaklasirsa ikinci giris kaydi olusmaz.",
+      "item": [
+        {
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/testing/reset-state",
+              "path": [
+                "api",
+                "testing",
+                "reset-state"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('reset message exists', function () { pm.expect(pm.response.json().message).to.eql('In-memory runtime state cleared.'); });"
+                ]
+              }
+            }
+          ],
+          "name": "1. State Reset"
+        },
+        {
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/testing/example-token?courierId=1",
+              "path": [
+                "api",
+                "testing",
+                "example-token"
+              ],
+              "query": [
+                {
+                  "key": "courierId",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', function () { pm.response.to.have.status(200); });",
+                  "const body = pm.response.json();",
+                  "pm.collectionVariables.set('courierId', '1');",
+                  "pm.collectionVariables.set('token', body.token);",
+                  "pm.collectionVariables.set('authorizationHeader', body.authorizationHeader);",
+                  "pm.collectionVariables.set('locationTime1', '2026-03-17T10:10:00Z');",
+                  "pm.collectionVariables.set('locationTime2', '2026-03-17T10:10:10Z');",
+                  "pm.collectionVariables.set('locationTime3', '2026-03-17T10:10:30Z');"
+                ]
+              }
+            }
+          ],
+          "name": "2. Token Al"
+        },
+        {
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{authorizationHeader}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/courier-locations",
+              "path": [
+                "api",
+                "courier-locations"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"time\": \"{{locationTime1}}\",\n  \"lat\": 40.9923307,\n  \"lng\": 29.1244229\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 201', function () { pm.response.to.have.status(201); });"
+                ]
+              }
+            }
+          ],
+          "name": "3. First Store Entry"
+        },
+        {
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{authorizationHeader}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/courier-locations",
+              "path": [
+                "api",
+                "courier-locations"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"time\": \"{{locationTime2}}\",\n  \"lat\": 40.9968,\n  \"lng\": 29.1244\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 201', function () { pm.response.to.have.status(201); });"
+                ]
+              }
+            }
+          ],
+          "name": "4. Move Away From Store"
+        },
+        {
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{authorizationHeader}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/courier-locations",
+              "path": [
+                "api",
+                "courier-locations"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"time\": \"{{locationTime3}}\",\n  \"lat\": 40.9923307,\n  \"lng\": 29.1244229\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 201', function () { pm.response.to.have.status(201); });"
+                ]
+              }
+            }
+          ],
+          "name": "5. Return Within 60 Seconds"
+        },
+        {
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/testing/store-entry-history?courierId=1",
+              "path": [
+                "api",
+                "testing",
+                "store-entry-history"
+              ],
+              "query": [
+                {
+                  "key": "courierId",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', function () { pm.response.to.have.status(200); });",
+                  "const body = pm.response.json();",
+                  "pm.test('still one store entry', function () { pm.expect(body.entryCount).to.eql(1); });",
+                  "pm.test('store remains Atasehir MMM Migros', function () { pm.expect(body.entries[0].storeName).to.eql('Ataşehir MMM Migros'); });"
+                ]
+              }
+            }
+          ],
+          "name": "6. Tek Giris Kaydi Oldugunu Dogrula"
+        }
+      ]
+    },
+    {
+      "name": "Scenario 3 - Reentry After 60 Seconds Is Recorded",
+      "description": "Ayni kurye ayni magazaya threshold sonrasinda tekrar girdiginde yeni bir kayit olusur.",
+      "item": [
+        {
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/testing/reset-state",
+              "path": [
+                "api",
+                "testing",
+                "reset-state"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('reset message exists', function () { pm.expect(pm.response.json().message).to.eql('In-memory runtime state cleared.'); });"
+                ]
+              }
+            }
+          ],
+          "name": "1. State Reset"
+        },
+        {
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/testing/example-token?courierId=1",
+              "path": [
+                "api",
+                "testing",
+                "example-token"
+              ],
+              "query": [
+                {
+                  "key": "courierId",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', function () { pm.response.to.have.status(200); });",
+                  "const body = pm.response.json();",
+                  "pm.collectionVariables.set('courierId', '1');",
+                  "pm.collectionVariables.set('token', body.token);",
+                  "pm.collectionVariables.set('authorizationHeader', body.authorizationHeader);",
+                  "pm.collectionVariables.set('locationTime1', '2026-03-17T10:20:00Z');",
+                  "pm.collectionVariables.set('locationTime2', '2026-03-17T10:20:10Z');",
+                  "pm.collectionVariables.set('locationTime3', '2026-03-17T10:21:01Z');"
+                ]
+              }
+            }
+          ],
+          "name": "2. Token Al"
+        },
+        {
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{authorizationHeader}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/courier-locations",
+              "path": [
+                "api",
+                "courier-locations"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"time\": \"{{locationTime1}}\",\n  \"lat\": 40.9923307,\n  \"lng\": 29.1244229\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 201', function () { pm.response.to.have.status(201); });"
+                ]
+              }
+            }
+          ],
+          "name": "3. First Store Entry"
+        },
+        {
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{authorizationHeader}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/courier-locations",
+              "path": [
+                "api",
+                "courier-locations"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"time\": \"{{locationTime2}}\",\n  \"lat\": 40.9968,\n  \"lng\": 29.1244\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 201', function () { pm.response.to.have.status(201); });"
+                ]
+              }
+            }
+          ],
+          "name": "4. Move Away From Store"
+        },
+        {
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{authorizationHeader}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/courier-locations",
+              "path": [
+                "api",
+                "courier-locations"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"time\": \"{{locationTime3}}\",\n  \"lat\": 40.9923307,\n  \"lng\": 29.1244229\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 201', function () { pm.response.to.have.status(201); });"
+                ]
+              }
+            }
+          ],
+          "name": "5. 60s Sonra Geri Don"
+        },
+        {
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/testing/store-entry-history?courierId=1",
+              "path": [
+                "api",
+                "testing",
+                "store-entry-history"
+              ],
+              "query": [
+                {
+                  "key": "courierId",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', function () { pm.response.to.have.status(200); });",
+                  "const body = pm.response.json();",
+                  "pm.test('two store entries exist', function () { pm.expect(body.entryCount).to.eql(2); });",
+                  "pm.test('first entry is Atasehir MMM Migros', function () { pm.expect(body.entries[0].storeName).to.eql('Ataşehir MMM Migros'); });",
+                  "pm.test('second entry is Atasehir MMM Migros', function () { pm.expect(body.entries[1].storeName).to.eql('Ataşehir MMM Migros'); });"
+                ]
+              }
+            }
+          ],
+          "name": "6. Iki Giris Kaydi Oldugunu Dogrula"
+        }
+      ]
+    },
+    {
+      "name": "Scenario 4 - Same Courier Enters Two Different Stores",
+      "description": "Ayni kurye farkli iki magazanin 100m yaricapina girdiginde iki ayri kayit olusur.",
+      "item": [
+        {
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/testing/reset-state",
+              "path": [
+                "api",
+                "testing",
+                "reset-state"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('reset message exists', function () { pm.expect(pm.response.json().message).to.eql('In-memory runtime state cleared.'); });"
+                ]
+              }
+            }
+          ],
+          "name": "1. State Reset"
+        },
+        {
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/testing/example-token?courierId=1",
+              "path": [
+                "api",
+                "testing",
+                "example-token"
+              ],
+              "query": [
+                {
+                  "key": "courierId",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', function () { pm.response.to.have.status(200); });",
+                  "const body = pm.response.json();",
+                  "pm.collectionVariables.set('courierId', '1');",
+                  "pm.collectionVariables.set('token', body.token);",
+                  "pm.collectionVariables.set('authorizationHeader', body.authorizationHeader);",
+                  "pm.collectionVariables.set('locationTime1', '2026-03-17T10:30:00Z');",
+                  "pm.collectionVariables.set('locationTime2', '2026-03-17T10:35:00Z');"
+                ]
+              }
+            }
+          ],
+          "name": "2. Token Al"
+        },
+        {
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{authorizationHeader}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/courier-locations",
+              "path": [
+                "api",
+                "courier-locations"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"time\": \"{{locationTime1}}\",\n  \"lat\": 40.9923307,\n  \"lng\": 29.1244229\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 201', function () { pm.response.to.have.status(201); });"
+                ]
+              }
+            }
+          ],
+          "name": "3. Atasehir Girisi"
+        },
+        {
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{authorizationHeader}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/courier-locations",
+              "path": [
+                "api",
+                "courier-locations"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"time\": \"{{locationTime2}}\",\n  \"lat\": 40.986106,\n  \"lng\": 29.1161293\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 201', function () { pm.response.to.have.status(201); });"
+                ]
+              }
+            }
+          ],
+          "name": "4. Novada Girisi"
+        },
+        {
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/testing/store-entry-history?courierId=1",
+              "path": [
+                "api",
+                "testing",
+                "store-entry-history"
+              ],
+              "query": [
+                {
+                  "key": "courierId",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', function () { pm.response.to.have.status(200); });",
+                  "const body = pm.response.json();",
+                  "const names = body.entries.map(entry => entry.storeName);",
+                  "pm.test('two entries exist', function () { pm.expect(body.entryCount).to.eql(2); });",
+                  "pm.test('Ataşehir exists', function () { pm.expect(names).to.include('Ataşehir MMM Migros'); });",
+                  "pm.test('Novada exists', function () { pm.expect(names).to.include('Novada MMM Migros'); });"
+                ]
+              }
+            }
+          ],
+          "name": "5. Verify Two Different Store Entries"
+        }
+      ]
+    },
+    {
+      "name": "Scenario 5 - Total Distance Is Calculated",
+      "description": "Ardisik lokasyon guncellemeleri sonrasi toplam mesafe endpointi pozitif bir sonuc doner.",
+      "item": [
+        {
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/testing/reset-state",
+              "path": [
+                "api",
+                "testing",
+                "reset-state"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('reset message exists', function () { pm.expect(pm.response.json().message).to.eql('In-memory runtime state cleared.'); });"
+                ]
+              }
+            }
+          ],
+          "name": "1. State Reset"
+        },
+        {
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/testing/example-token?courierId=2",
+              "path": [
+                "api",
+                "testing",
+                "example-token"
+              ],
+              "query": [
+                {
+                  "key": "courierId",
+                  "value": "2"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', function () { pm.response.to.have.status(200); });",
+                  "const body = pm.response.json();",
+                  "pm.collectionVariables.set('courierId', '2');",
+                  "pm.collectionVariables.set('token', body.token);",
+                  "pm.collectionVariables.set('authorizationHeader', body.authorizationHeader);",
+                  "pm.collectionVariables.set('locationTime1', '2026-03-17T10:40:00Z');",
+                  "pm.collectionVariables.set('locationTime2', '2026-03-17T10:40:20Z');",
+                  "pm.collectionVariables.set('locationTime3', '2026-03-17T10:40:40Z');"
+                ]
+              }
+            }
+          ],
+          "name": "2. Token Al"
+        },
+        {
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{authorizationHeader}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/courier-locations",
+              "path": [
+                "api",
+                "courier-locations"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"time\": \"{{locationTime1}}\",\n  \"lat\": 40.99,\n  \"lng\": 29.12\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 201', function () { pm.response.to.have.status(201); });"
+                ]
+              }
+            }
+          ],
+          "name": "3. Ilk Lokasyonu Gonder"
+        },
+        {
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{authorizationHeader}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/courier-locations",
+              "path": [
+                "api",
+                "courier-locations"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"time\": \"{{locationTime2}}\",\n  \"lat\": 40.991,\n  \"lng\": 29.121\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 201', function () { pm.response.to.have.status(201); });"
+                ]
+              }
+            }
+          ],
+          "name": "4. Ikinci Lokasyonu Gonder"
+        },
+        {
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{authorizationHeader}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/courier-locations",
+              "path": [
+                "api",
+                "courier-locations"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"time\": \"{{locationTime3}}\",\n  \"lat\": 40.992,\n  \"lng\": 29.122\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 201', function () { pm.response.to.have.status(201); });"
+                ]
+              }
+            }
+          ],
+          "name": "5. Ucuncu Lokasyonu Gonder"
+        },
+        {
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/couriers/2/total-distance",
+              "path": [
+                "api",
+                "couriers",
+                "2",
+                "total-distance"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', function () { pm.response.to.have.status(200); });",
+                  "const body = pm.response.json();",
+                  "pm.test('courier name is Mehmet Demir', function () { pm.expect(body.courierName).to.eql('Mehmet Demir'); });",
+                  "pm.test('distance is greater than zero', function () { pm.expect(body.totalDistance).to.be.above(0); });",
+                  "pm.collectionVariables.set('totalDistance', String(body.totalDistance));"
+                ]
+              }
+            }
+          ],
+          "name": "6. Verify Total Distance"
+        }
+      ]
+    }
+  ]
+}

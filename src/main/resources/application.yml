@@ -1,0 +1,39 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: courier-tracking
+
+courier:
+  distance:
+    strategy: HAVERSINE
+  store:
+    proximity-meters: 100
+    reentry-threshold-seconds: 60
+  idempotency:
+    ttl-seconds: 600
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
+
+spring.config.import: optional:classpath:resilience4j.yml
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  metrics:
+    tags:
+      application: courier-tracking
+
+logging:
+  level:
+    com.migros.couriertracking: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [%X{requestId:-N/A}] %-5level %logger{36} - %msg%n"
