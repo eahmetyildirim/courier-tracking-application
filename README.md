@@ -18,7 +18,7 @@ This implementation covers the case requirements as follows:
 
 ## Solution Scope
 
-This version is intentionally `prod-lite`:
+This version is intentionally `case`:
 
 - reference data comes from `src/main/resources/couriers.json` and `src/main/resources/stores.json`
 - request processing is deterministic and synchronous
