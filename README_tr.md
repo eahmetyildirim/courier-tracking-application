@@ -18,7 +18,7 @@ Bu implementasyon case requirement'larını şu şekilde karşılar:
 
 ## Solution Scope
 
-Bu versiyon bilinçli olarak `prod-lite` tutuldu:
+Bu versiyon bilinçli olarak `case` tutuldu:
 
 - reference data `src/main/resources/couriers.json` ve `src/main/resources/stores.json` dosyalarından gelir
 - request processing deterministic ve synchronous çalışır
